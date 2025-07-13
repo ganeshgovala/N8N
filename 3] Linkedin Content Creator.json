@@ -1,0 +1,283 @@
+{
+  "name": "3] Linkedin Content Creator",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -400,
+        0
+      ],
+      "id": "b52ce8dc-5aff-43fb-81f8-4f4ec9ff7799",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1ZtY7BtCg1647Byom0V5aZaGPU2OMrt6wJS52eBm-v1Q",
+          "mode": "list",
+          "cachedResultName": "Linkedin Content Topics",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ZtY7BtCg1647Byom0V5aZaGPU2OMrt6wJS52eBm-v1Q/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ZtY7BtCg1647Byom0V5aZaGPU2OMrt6wJS52eBm-v1Q/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Progress",
+              "lookupValue": "Pending"
+            }
+          ]
+        },
+        "options": {
+          "returnFirstMatch": true
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        -192,
+        0
+      ],
+      "id": "a7592ce3-d5c7-4414-8aed-4b4aa48f7c8a",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "RxVjnnfFXPGLpzhe",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.tavily.com/search",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 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"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"query\": \"{{ $json.Topic }}\",\n  \"auto_parameters\": false,\n  \"topic\": \"general\",\n  \"search_depth\": \"basic\",\n  \"chunks_per_source\": 3,\n  \"max_results\": 3,\n  \"time_range\": null,\n  \"days\": 7,\n  \"include_answer\": true,\n  \"include_raw_content\": true,\n  \"include_images\": false,\n  \"include_image_descriptions\": false,\n  \"include_favicon\": false,\n  \"include_domains\": [],\n  \"exclude_domains\": [],\n  \"country\": null\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        16,
+        0
+      ],
+      "id": "58fd76ce-f938-4f19-a8b8-445acdef5043",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Article 1 : {{ $json.results[0].content }}\nArticle 2 : {{ $json.results[1].content }}\nArticle 3 : {{ $json.results[2].content }}\n\n# Overview  \nYou are an AI agent that generates compelling LinkedIn post content from long-form articles.  \n\n## Context  \n- The agent receives full article text as input.  \n- The goal is to transform the article into a catchy, story-driven LinkedIn post.  \n- Posts should grab attention, inspire engagement, and be aligned with professional audiences.  \n\n## Instructions  \n1. Read and analyze the full article content.  \n2. Identify the key message, insight, or story within the article.  \n3. Rewrite the core message into a storytelling format suitable for LinkedIn.  \n4. Hook the reader in the first 1–2 sentences.  \n5. Use a narrative style with short, punchy paragraphs.  \n6. End with a clear takeaway or reflection and a soft call to action (e.g., question or invitation to comment).\n7. Start with an attention grabbing heading\n",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.1,
+      "position": [
+        224,
+        0
+      ],
+      "id": "28618efb-de30-4c4b-badc-c74d107e54ab",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        224,
+        192
+      ],
+      "id": "c4252685-a3ee-41de-b4d8-642ae1fbe296",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "29gfQL08ROioCfYp",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1ZtY7BtCg1647Byom0V5aZaGPU2OMrt6wJS52eBm-v1Q",
+          "mode": "list",
+          "cachedResultName": "Linkedin Content Topics",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ZtY7BtCg1647Byom0V5aZaGPU2OMrt6wJS52eBm-v1Q/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ZtY7BtCg1647Byom0V5aZaGPU2OMrt6wJS52eBm-v1Q/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": "={{ $('Get row(s) in sheet').item.json.row_number }}",
+            "Progress": "Completed",
+            "Content": "={{ $json.output }}"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "Topic",
+              "displayName": "Topic",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Progress",
+              "displayName": "Progress",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Content",
+              "displayName": "Content",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        576,
+        0
+      ],
+      "id": "d6c9a52f-8c71-4eb8-b11e-979f61d37f3e",
+      "name": "Update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "RxVjnnfFXPGLpzhe",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update row in sheet": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "acbebd3d-22cc-4031-80f0-2a5481d7c93d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "106122581e5d40270d01e427fcff219b82ce9ec9c0ea5abe19b5982d156bcabc"
+  },
+  "id": "lkj3yUnmlZrS8BxL",
+  "tags": []
+}
