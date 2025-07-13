@@ -1,0 +1,327 @@
+{
+  "name": "2] Customer Support",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {},
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -400,
+        0
+      ],
+      "id": "ec875880-60a0-4a39-9613-96021eccfcbe",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "E9dTFzjZwznFWIYC",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "inputText": "={{ $json.text }}",
+        "categories": {
+          "categories": [
+            {
+              "category": "Policy Query",
+              "description": "any thing related to policies of the company"
+            },
+            {
+              "category": "Other",
+              "description": "any other text not related to the policies of the company"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textClassifier",
+      "typeVersion": 1.1,
+      "position": [
+        -192,
+        0
+      ],
+      "id": "b9140778-2a4d-4af7-a4dc-bd238eb5b507",
+      "name": "Text Classifier"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash-001",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -192,
+        208
+      ],
+      "id": "4af33ca9-e312-45eb-936a-c4c0f39aaca7",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "ZmqGpgIrmhLdoyqi",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        288,
+        208
+      ],
+      "id": "097acedf-542a-4843-8e5f-cbcedfa80d9e",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.text }}",
+        "options": {
+          "systemMessage": "=# Overview  \nYou are an AI agent responsible for automatically replying to customer support emails using information stored in a Pinecone vector database.  \n\n## Context    \n- The agent must generate customer support replies using the knowledge base embedded in Pinecone.  \n- Replies should be friendly, helpful, and include emojis where appropriate.  \n\n## Instructions     \n1. Use the content to query the Pinecone vector database for relevant information.  \n2. Generate a concise, friendly support response based on the matched KB data.  \n3. Include emojis to enhance friendliness and approachability.\n4. End the mail with best regards \n\n## Output  \n- Output only the body of the mail\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.1,
+      "position": [
+        576,
+        -16
+      ],
+      "id": "d7cf852a-c40a-443b-86d6-74420d96a779",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash-exp",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        576,
+        192
+      ],
+      "id": "21685ef8-e42e-4024-8e04-ad2901fe0f63",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "ZmqGpgIrmhLdoyqi",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Use this tool to get the data from pinecone vector store",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "sample",
+          "mode": "list",
+          "cachedResultName": "sample"
+        },
+        "includeDocumentMetadata": false,
+        "options": {
+          "pineconeNamespace": "FAQ"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        880,
+        176
+      ],
+      "id": "86736a12-a472-4e23-8387-fd40a7bf55c7",
+      "name": "Pinecone Vector Store",
+      "credentials": {
+        "pineconeApi": {
+          "id": "FDvshQZUB0YMat28",
+          "name": "PineconeApi account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        976,
+        384
+      ],
+      "id": "baf4c70c-77dc-4f6a-8598-58fdd6b3c159",
+      "name": "Embeddings Google Gemini",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "ZmqGpgIrmhLdoyqi",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Gmail Trigger": [
+      {
+        "json": {
+          "id": "19802a2c4c57793a",
+          "threadId": "19802a2c4c57793a",
+          "labelIds": [
+            "UNREAD",
+            "IMPORTANT",
+            "CATEGORY_PERSONAL",
+            "INBOX"
+          ],
+          "sizeEstimate": 5689,
+          "headers": {
+            "delivered-to": "Delivered-To: sriramganeshgovala@gmail.com",
+            "received": "Received: from mail-sor-f41.google.com (mail-sor-f41.google.com. [209.85.220.41])\r\n        by mx.google.com with SMTPS id d75a77b69052e-4a9ede40353sor62186041cf.3.2025.07.13.00.14.38\r\n        for <sriramganeshgovala@gmail.com>\r\n        (Google Transport Security);\r\n        Sun, 13 Jul 2025 00:14:38 -0700 (PDT)",
+            "x-received": "X-Received: by 2002:a05:622a:251:b0:4a9:c8e3:572 with SMTP id\r\n d75a77b69052e-4a9fb874e83mr120881311cf.14.1752390877687; Sun, 13 Jul 2025\r\n 00:14:37 -0700 (PDT)",
+            "arc-seal": "ARC-Seal: i=1; a=rsa-sha256; t=1752390878; cv=none;\r\n        d=google.com; s=arc-20240605;\r\n        b=Sdh3R7Ytnhy/Gde7y9IrGDqFKVW3z3wchLA17uOASDCA8uY7pG8sYBkvMIBLW1d9c5\r\n         MQLK8O6rcyS8Dg+hysBKjuvDvP1ETO4kjJgV7bzu7j8uuZBOKBPCmoDaKy+ZDLpKdm6i\r\n         ObvkRayU4fne7x2YnjTJWqxbD2OF2w/w/KlDOmlnvNpcRynd2Pwbme6OQIr4TMFwt9Z7\r\n         PZptXHzaMmlOw06/X9UYqyUN9YxpzwxRj/jhBVAIwGuX1jk/ePvl4eRF5eA6At+Rpqm9\r\n         yYapHgUxdfeYy0e7Xs04h32yb2GxXfqf1udALFkx4lC0zjmwOmVrASBdg0YYm3r7igEr\r\n         mOcg==",
+            "arc-message-signature": "ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;\r\n        h=to:subject:message-id:date:from:mime-version:dkim-signature;\r\n        bh=oTVCsohA5eCcnmZ6dYpPt34UzB5tGp3Q2JgJ1DcR3Qw=;\r\n        fh=RPXobk2vPpjU108z9rVUJpBGqsIIpjWo+2YZUyN9vdA=;\r\n        b=WNOOWMSg89aBBx7vXZe3bJGoRBGGc8umlhY/Qhh/QY8jo/2XeEEpt5mrAfLCBxop4B\r\n         qEPcPEw1/O4t5Lq26HUphTlyQwUNODUqp6yjTVpT8JYnoRPRXr09cBvXz6tpMMtBKBzr\r\n         Qw4aSDksc+Xqi0z2q12ktQ804QUqIakgJ4J0RTbJ7jVG1tPY9NOi+n5D5zZwUvAJtyOK\r\n         ep6QS5EXrpDwtLUGAmLENCB+lNFafBlXtPTMVhoR4abFVZZ7XegWsEI4CNWR/unvx4m8\r\n         VwxsO6D21LUaemdoeBRNcmFk3cNHDwCwa/zEkMrEp16sJfYiilvk0sih5ZvfkueFWyg+\r\n         VZaQ==;\r\n        dara=google.com",
+            "arc-authentication-results": "ARC-Authentication-Results: i=1; mx.google.com;\r\n       dkim=pass header.i=@gmail.com header.s=20230601 header.b=\"ee82M/2Q\";\r\n       spf=pass (google.com: domain of sriramganesh28@gmail.com designates 209.85.220.41 as permitted sender) smtp.mailfrom=sriramganesh28@gmail.com;\r\n       dmarc=pass (p=NONE sp=QUARANTINE dis=NONE) header.from=gmail.com;\r\n       dara=pass header.i=@gmail.com",
+            "return-path": "Return-Path: <sriramganesh28@gmail.com>",
+            "received-spf": "Received-SPF: pass (google.com: domain of sriramganesh28@gmail.com designates 209.85.220.41 as permitted sender) client-ip=209.85.220.41;",
+            "authentication-results": "Authentication-Results: mx.google.com;\r\n       dkim=pass header.i=@gmail.com header.s=20230601 header.b=\"ee82M/2Q\";\r\n       spf=pass (google.com: domain of sriramganesh28@gmail.com designates 209.85.220.41 as permitted sender) smtp.mailfrom=sriramganesh28@gmail.com;\r\n       dmarc=pass (p=NONE sp=QUARANTINE dis=NONE) header.from=gmail.com;\r\n       dara=pass header.i=@gmail.com",
+            "dkim-signature": "DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;\r\n        d=gmail.com; s=20230601; t=1752390878; x=1752995678; dara=google.com;\r\n        h=to:subject:message-id:date:from:mime-version:from:to:cc:subject\r\n         :date:message-id:reply-to;\r\n        bh=oTVCsohA5eCcnmZ6dYpPt34UzB5tGp3Q2JgJ1DcR3Qw=;\r\n        b=ee82M/2Qgxkdi452jj99X3Cv1e4qDwWj5YiXqmO0vCt7f+bNYxIETXlzuvLecYvrc6\r\n         iYoi7X1y43hc5GuJYDfdaoIkdxbDXMOkAwIE3D+qM9hQ95A8DGTiIB01szMGgEbN24+q\r\n         lY5njVLO7YB+AMRo/hurSILUBw4UtsUyF6AzrCFpqv6D4bRfYOD4avSgF6qxx/phw2jD\r\n         wv6+B5NCPIyYN4LUKU6l0ReMBNunh8n7S3h4u+go0bN3MhNfW35K09DjPjKcg39+oASG\r\n         WFUT/8TMHMb0y9vyXWVQr2kDtmw9YPWqfVS7gWsgocGWMZa5KEIfvzaFUR3aLwIreVrn\r\n         +G3g==",
+            "x-google-dkim-signature": "X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;\r\n        d=1e100.net; s=20230601; t=1752390878; x=1752995678;\r\n        h=to:subject:message-id:date:from:mime-version:x-gm-message-state\r\n         :from:to:cc:subject:date:message-id:reply-to;\r\n        bh=oTVCsohA5eCcnmZ6dYpPt34UzB5tGp3Q2JgJ1DcR3Qw=;\r\n        b=FupoDsu+XE/+JrLln4nmN91sHWxMALE8KZwZDobaFcLFWJiZbXNl2SNdWWuR+rf4G7\r\n         X2Jro6qBqgXVScTl54m7ZNb5/qKdxwtxuFbeKdNBgdCylLDaTR4C3uQhHDWgyHpJ5z4M\r\n         EtJsQfDDHTpqhBNThTUxc2YtjmXjJwtzBEWDLDB30Jfng2YhK0lnA323ToJheOROGWAb\r\n         KEFn6sTyM67uOl5Td/j2LpBsBVyMSJXQz2UcOTVRaGhEmbgPmydNl4Mg4m1ZCb0geVE+\r\n         OXXN8VNTOcknGU3ZY8XeCxZhECjjIeJzDg6D3nW0GMGpiqWOG/Fp/qVun0V0m6CHU0eD\r\n         Vy+Q==",
+            "x-gm-message-state": "X-Gm-Message-State: AOJu0Yzqsw12SfZ9hmYynKi0mRco8cwMebVjPWhJvufRItlhyJ9mJ6g9\r\n\tf7TrgEFjV32tgX/k8++kWaRoswCpAZgiJpRGrcKw+eJb05RlXE/4T5YySVXCTXGSW8cALYtaEDc\r\n\tI0Asnx5AIvx33F+lH4HF+o0hDekO1DT0cd04B",
+            "x-gm-gg": "X-Gm-Gg: ASbGncv2ngyhyPz5kJWZctV5y1yLzAuxfv27C6RVf8DGOQZjJ3nu+UeT3K8O5Hzl6qe\r\n\tJ1h1yAmbBgzyIctpHoS8YtcFxjh6ERM3Qq4EIPy/FiWSs7eVgiR+dwdumkz9RdWpVyZ5+QwEGaQ\r\n\tFIPWda5dt+SPM1Ieq0ebyFPFdlXNA5XS6KeJAAkNfh0aOevyIzMU//YjxhVKN/k9Prm7byvhdMx\r\n\tVxQ6CQ=",
+            "x-google-smtp-source": "X-Google-Smtp-Source: AGHT+IFyRQ8AB+DYoImmFOxKRGknYqDrKJfXJWkswaMBFp/WZuBNVqICCnP+gXFPsgySjtbqB6d28oDiEO01q0ymYNw=",
+            "mime-version": "MIME-Version: 1.0",
+            "from": "From: Sri Ram Ganesh <sriramganesh28@gmail.com>",
+            "date": "Date: Sun, 13 Jul 2025 12:44:27 +0530",
+            "x-gm-features": "X-Gm-Features: Ac12FXwbyudyLE2g2v-SY0H9ZJRvbO-eJ7ZvkfIZPFT6BTj1EdUL2DOUg9Mvu40",
+            "message-id": "Message-ID: <CAH9ENKss3BvDKSQkveM+VN0nFB3vooKrx2A9+kxz6RFSW=tvug@mail.gmail.com>",
+            "subject": "Subject: Policy enquiry",
+            "to": "To: \"sriramganeshgovala@gmail.com\" <sriramganeshgovala@gmail.com>",
+            "content-type": "Content-Type: multipart/alternative; boundary=\"000000000000c5b9920639ca4b06\""
+          },
+          "html": "<div dir=\"ltr\">What is your leave policy?</div>\n",
+          "text": "What is your leave policy?\n",
+          "textAsHtml": "<p>What is your leave policy?</p>",
+          "subject": "Policy enquiry",
+          "date": "2025-07-13T07:14:27.000Z",
+          "to": {
+            "value": [
+              {
+                "address": "sriramganeshgovala@gmail.com",
+                "name": ""
+              }
+            ],
+            "html": "<span class=\"mp_address_group\"><a href=\"mailto:sriramganeshgovala@gmail.com\" class=\"mp_address_email\">sriramganeshgovala@gmail.com</a></span>",
+            "text": "sriramganeshgovala@gmail.com"
+          },
+          "from": {
+            "value": [
+              {
+                "address": "sriramganesh28@gmail.com",
+                "name": "Sri Ram Ganesh"
+              }
+            ],
+            "html": "<span class=\"mp_address_group\"><span class=\"mp_address_name\">Sri Ram Ganesh</span> &lt;<a href=\"mailto:sriramganesh28@gmail.com\" class=\"mp_address_email\">sriramganesh28@gmail.com</a>&gt;</span>",
+            "text": "\"Sri Ram Ganesh\" <sriramganesh28@gmail.com>"
+          },
+          "messageId": "<CAH9ENKss3BvDKSQkveM+VN0nFB3vooKrx2A9+kxz6RFSW=tvug@mail.gmail.com>"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Text Classifier",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Text Classifier",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Text Classifier": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "84ae0155-9404-4335-bae7-bba775312817",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "84b70a9fafbd631896343823c76f1a12bbd784c922ca5092ee7a9fe605466744"
+  },
+  "id": "6yF6XlpGWiFul4xG",
+  "tags": []
+}
