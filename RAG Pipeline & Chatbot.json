@@ -1,0 +1,483 @@
+{
+  "name": "RAG Pipeline & Chatbot",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "1X5tCJxaughN1FRiaX_ujCF5IGI_TyDIz",
+          "mode": "list",
+          "cachedResultName": "Demo",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1X5tCJxaughN1FRiaX_ujCF5IGI_TyDIz"
+        },
+        "event": "fileCreated",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        -288,
+        0
+      ],
+      "id": "6ea539ba-6df8-4f29-bb72-a4fa125b82a1",
+      "name": "Google Drive Trigger",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "yFRRrzucEEnX4xs7",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -112,
+        0
+      ],
+      "id": "e88e335a-43d0-43e0-984a-c12de82ac340",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "yFRRrzucEEnX4xs7",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "sample",
+          "mode": "list",
+          "cachedResultName": "sample"
+        },
+        "options": {
+          "pineconeNamespace": "FAQ"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        96,
+        0
+      ],
+      "id": "26de5f01-378a-432f-b845-f53429712fc0",
+      "name": "Pinecone Vector Store",
+      "credentials": {
+        "pineconeApi": {
+          "id": "FDvshQZUB0YMat28",
+          "name": "PineconeApi account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        32,
+        208
+      ],
+      "id": "bc4d704c-b8be-4fc4-84d9-1c3b366f674e",
+      "name": "Embeddings Google Gemini",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "ZmqGpgIrmhLdoyqi",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "textSplittingMode": "custom",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        240,
+        208
+      ],
+      "id": "00d76b8e-4081-418d-9065-f8e438aaf02a",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        336,
+        416
+      ],
+      "id": "3b5b785a-d30e-48ae-bba6-6dd98f6fafa2",
+      "name": "Recursive Character Text Splitter"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        752,
+        0
+      ],
+      "id": "843bedf0-2702-4079-b423-e2d579f7a6b6",
+      "name": "When chat message received",
+      "webhookId": "6e13d6a9-6c0c-4548-8fca-161a5082d6a4"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are a helpful assistant for the company named Technova Solutions. Answer the queries from the Pinecone Vector store knowledge base"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.1,
+      "position": [
+        928,
+        0
+      ],
+      "id": "6613ee24-bcea-404e-b69d-7c812dbdec75",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        896,
+        176
+      ],
+      "id": "d4478e07-74fe-4daf-86f0-d24e55f5e8bb",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "ZmqGpgIrmhLdoyqi",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Use this tool to get the data",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "sample",
+          "mode": "list",
+          "cachedResultName": "sample"
+        },
+        "includeDocumentMetadata": false,
+        "options": {
+          "pineconeNamespace": "FAQ"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        1152,
+        256
+      ],
+      "id": "f5977466-6830-440b-92e8-8cd7479e4acb",
+      "name": "Pinecone Vector Store1",
+      "credentials": {
+        "pineconeApi": {
+          "id": "FDvshQZUB0YMat28",
+          "name": "PineconeApi account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1248,
+        464
+      ],
+      "id": "da7cf413-c58e-49b1-94bf-18f69183807d",
+      "name": "Embeddings Google Gemini1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "ZmqGpgIrmhLdoyqi",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Google Drive Trigger": [
+      {
+        "json": {
+          "exportLinks": {
+            "application/rtf": "https://docs.google.com/feeds/download/documents/export/Export?id=1h3vLuuGyR30FnBiPpAcRuwLpvq-kaAk0LNTVorXwEro&exportFormat=rtf",
+            "application/vnd.oasis.opendocument.text": "https://docs.google.com/feeds/download/documents/export/Export?id=1h3vLuuGyR30FnBiPpAcRuwLpvq-kaAk0LNTVorXwEro&exportFormat=odt",
+            "text/html": "https://docs.google.com/feeds/download/documents/export/Export?id=1h3vLuuGyR30FnBiPpAcRuwLpvq-kaAk0LNTVorXwEro&exportFormat=html",
+            "application/pdf": "https://docs.google.com/feeds/download/documents/export/Export?id=1h3vLuuGyR30FnBiPpAcRuwLpvq-kaAk0LNTVorXwEro&exportFormat=pdf",
+            "text/x-markdown": "https://docs.google.com/feeds/download/documents/export/Export?id=1h3vLuuGyR30FnBiPpAcRuwLpvq-kaAk0LNTVorXwEro&exportFormat=markdown",
+            "text/markdown": "https://docs.google.com/feeds/download/documents/export/Export?id=1h3vLuuGyR30FnBiPpAcRuwLpvq-kaAk0LNTVorXwEro&exportFormat=markdown",
+            "application/epub+zip": "https://docs.google.com/feeds/download/documents/export/Export?id=1h3vLuuGyR30FnBiPpAcRuwLpvq-kaAk0LNTVorXwEro&exportFormat=epub",
+            "application/zip": "https://docs.google.com/feeds/download/documents/export/Export?id=1h3vLuuGyR30FnBiPpAcRuwLpvq-kaAk0LNTVorXwEro&exportFormat=zip",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "https://docs.google.com/feeds/download/documents/export/Export?id=1h3vLuuGyR30FnBiPpAcRuwLpvq-kaAk0LNTVorXwEro&exportFormat=docx",
+            "text/plain": "https://docs.google.com/feeds/download/documents/export/Export?id=1h3vLuuGyR30FnBiPpAcRuwLpvq-kaAk0LNTVorXwEro&exportFormat=txt"
+          },
+          "parents": [
+            "1X5tCJxaughN1FRiaX_ujCF5IGI_TyDIz"
+          ],
+          "lastModifyingUser": {
+            "displayName": "Govala Sri Ram Ganesh",
+            "kind": "drive#user",
+            "me": true,
+            "permissionId": "18086411485267245988",
+            "emailAddress": "sriramganeshgovala@gmail.com",
+            "photoLink": "https://lh3.googleusercontent.com/a/ACg8ocIH9UYtUt1oZEjhIyyMZ_LxIWOh7rkl2H9ILWswkAPhNJAZCQ=s64"
+          },
+          "owners": [
+            {
+              "displayName": "Govala Sri Ram Ganesh",
+              "kind": "drive#user",
+              "me": true,
+              "permissionId": "18086411485267245988",
+              "emailAddress": "sriramganeshgovala@gmail.com",
+              "photoLink": "https://lh3.googleusercontent.com/a/ACg8ocIH9UYtUt1oZEjhIyyMZ_LxIWOh7rkl2H9ILWswkAPhNJAZCQ=s64"
+            }
+          ],
+          "permissions": [
+            {
+              "kind": "drive#permission",
+              "id": "18086411485267245988",
+              "type": "user",
+              "emailAddress": "sriramganeshgovala@gmail.com",
+              "role": "owner",
+              "displayName": "Govala Sri Ram Ganesh",
+              "photoLink": "https://lh3.googleusercontent.com/a/ACg8ocIH9UYtUt1oZEjhIyyMZ_LxIWOh7rkl2H9ILWswkAPhNJAZCQ=s64",
+              "deleted": false,
+              "pendingOwner": false
+            }
+          ],
+          "spaces": [
+            "drive"
+          ],
+          "capabilities": {
+            "canAcceptOwnership": false,
+            "canAddChildren": false,
+            "canAddMyDriveParent": false,
+            "canChangeCopyRequiresWriterPermission": true,
+            "canChangeItemDownloadRestriction": true,
+            "canChangeSecurityUpdateEnabled": false,
+            "canChangeViewersCanCopyContent": true,
+            "canComment": true,
+            "canCopy": true,
+            "canDelete": true,
+            "canDisableInheritedPermissions": false,
+            "canDownload": true,
+            "canEdit": true,
+            "canEnableInheritedPermissions": true,
+            "canListChildren": false,
+            "canModifyContent": true,
+            "canModifyContentRestriction": true,
+            "canModifyEditorContentRestriction": true,
+            "canModifyOwnerContentRestriction": true,
+            "canModifyLabels": false,
+            "canMoveChildrenWithinDrive": false,
+            "canMoveItemIntoTeamDrive": true,
+            "canMoveItemOutOfDrive": true,
+            "canMoveItemWithinDrive": true,
+            "canReadLabels": false,
+            "canReadRevisions": true,
+            "canRemoveChildren": false,
+            "canRemoveContentRestriction": false,
+            "canRemoveMyDriveParent": true,
+            "canRename": true,
+            "canShare": true,
+            "canTrash": true,
+            "canUntrash": true
+          },
+          "permissionIds": [
+            "18086411485267245988"
+          ],
+          "linkShareMetadata": {
+            "securityUpdateEligible": false,
+            "securityUpdateEnabled": true
+          },
+          "downloadRestrictions": {
+            "itemDownloadRestriction": {
+              "restrictedForReaders": false,
+              "restrictedForWriters": false
+            },
+            "effectiveDownloadRestrictionWithContext": {
+              "restrictedForReaders": false,
+              "restrictedForWriters": false
+            }
+          },
+          "kind": "drive#file",
+          "id": "1h3vLuuGyR30FnBiPpAcRuwLpvq-kaAk0LNTVorXwEro",
+          "name": "Frequently Asked Questions (FAQ)",
+          "mimeType": "application/vnd.google-apps.document",
+          "starred": false,
+          "trashed": false,
+          "explicitlyTrashed": false,
+          "version": "20",
+          "webViewLink": "https://docs.google.com/document/d/1h3vLuuGyR30FnBiPpAcRuwLpvq-kaAk0LNTVorXwEro/edit?usp=drivesdk",
+          "iconLink": "https://drive-thirdparty.googleusercontent.com/16/type/application/vnd.google-apps.document",
+          "hasThumbnail": true,
+          "thumbnailLink": "https://lh3.googleusercontent.com/drive-storage/AJQWtBPXiTbrYs4UJXZugh-corvtWrp_TwWJ6Z6m7HVN8m_xy7ICYOPrwQQTf8pkL_wQicRQQLBn5yg7iQSWiafzy0cpbCySqbqL4vJGaeV0jyWivY1VZbFYMJTIi4Y_Mg=s220",
+          "thumbnailVersion": "5",
+          "viewedByMe": true,
+          "viewedByMeTime": "2025-07-12T13:08:41.341Z",
+          "createdTime": "2025-07-10T06:09:28.858Z",
+          "modifiedTime": "2025-07-12T13:02:23.092Z",
+          "modifiedByMeTime": "2025-07-12T13:02:23.092Z",
+          "modifiedByMe": true,
+          "shared": false,
+          "ownedByMe": true,
+          "viewersCanCopyContent": true,
+          "copyRequiresWriterPermission": false,
+          "writersCanShare": true,
+          "size": "5864",
+          "quotaBytesUsed": "5864",
+          "isAppAuthorized": false,
+          "inheritedPermissionsDisabled": false
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Google Drive Trigger": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store1",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "10de94e8-dc28-4166-91b7-eabca038940a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "84b70a9fafbd631896343823c76f1a12bbd784c922ca5092ee7a9fe605466744"
+  },
+  "id": "0AXFjx5aNgtR7ZIh",
+  "tags": []
+}
